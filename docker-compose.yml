@@ -1,0 +1,45 @@
+version: '3'
+name: modmail
+services:
+  build_bot:
+    build:
+      context: ./docker/node
+      args:
+        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
+        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+    volumes:
+      - ./:/modmail
+    networks:
+      - network
+    command: |-
+      bash -c "cd /modmail && npm ci"
+  bot:
+    build:
+      context: ./docker/node
+      args:
+        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
+        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+    restart: on-failure
+    expose:
+      - ${MM_PORT:-8890}:${MM_PORT:-8890}
+    depends_on:
+      - build_bot
+    volumes:
+      - ./:/modmail
+    networks:
+      - network
+      - nginx-proxy
+    environment:
+      VIRTUAL_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
+      VIRTUAL_PATH: /
+      #VIRTUAL_DEST:
+      #VIRTUAL_PORT:
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      DEBUG: ${DEBUG:-false}
+    command: ["/bin/bash", "/modmail/docker/start-modmail.sh"]
+networks:
+  network:
+  nginx-proxy:
+    name: nginx-proxy
+    external: true
