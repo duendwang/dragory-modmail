@@ -1,6 +1,27 @@
 # Changelog
 For instructions on how to update the bot, see **[✨ Updating the bot](docs/updating.md)**
 
+## v3.8.0 (2024-10-14)
+* Added `useDisplaynames` option to use a user's display name instead of their username (by DarkView)
+  * Defaults to `on`
+  * `useNicknames` will override this in most cases
+* Added `overrideRoleNameDisplay` option to set the displayed moderator role name to a specific text (by jpptinsley)
+  * Defaults to none (using moderator role instead)
+* Added `!blocklist` command to list all blocked users (by Akinator31)
+* Fixed typingProxy (by Akinator31)
+* Updated to Eris 0.18.0 (by DarkView)
+* `modmailbot-pm2.json` now includes timestamps by default (by wrac4242)
+
+## v3.7.0 (2023-09-12)
+* Added support for Node.js 18 and higher
+* Added `!realreply` / `!rr` command ([#763](https://github.com/Dragory/modmailbot/pull/763))
+  * This command always replies with the moderator's name, even if `forceAnon` is enabled
+* Fixed messages blocked by Discord crashing the bot ([#730](https://github.com/Dragory/modmailbot/pull/730))
+* Stickers are now properly embedded ([#765](https://github.com/Dragory/modmailbot/pull/765))
+* Updated Eris and other dependencies
+  * This should resolve errors with stage channels and some other new features
+* Other small fixes ([#774](https://github.com/Dragory/modmailbot/pull/774), [#772](https://github.com/Dragory/modmailbot/pull/772), [#771](https://github.com/Dragory/modmailbot/pull/771), [#750](https://github.com/Dragory/modmailbot/pull/750))
+
 ## v3.6.1
 * Fixed inline replies not working with alwaysReply or snippets
 * Fixed buggy note display in thread header
