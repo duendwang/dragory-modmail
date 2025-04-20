@@ -1,12 +1,17 @@
-version: '3'
 name: modmail
 services:
   build_bot:
     build:
       context: ./docker/node
       args:
-        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
-        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+        DOCKER_USER_UID: ${PUID:?Missing PUID}
+        DOCKER_USER_GID: ${PGID:?Missing PGID}
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     volumes:
       - ./:/modmail
     networks:
@@ -17,9 +22,15 @@ services:
     build:
       context: ./docker/node
       args:
-        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
-        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+        DOCKER_USER_UID: ${PUID:?Missing PUID}
+        DOCKER_USER_GID: ${PGID:?Missing PGID}
     restart: on-failure
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     expose:
       - ${MM_PORT:-8890}:${MM_PORT:-8890}
     depends_on:
