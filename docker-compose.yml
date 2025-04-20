@@ -39,7 +39,7 @@ services:
       - ./:/modmail
     networks:
       - network
-      - nginx-proxy
+      - traefik-proxy
     environment:
       VIRTUAL_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
       VIRTUAL_PATH: /
@@ -51,6 +51,6 @@ services:
     command: ["/bin/bash", "/modmail/docker/start-modmail.sh"]
 networks:
   network:
-  nginx-proxy:
-    name: nginx-proxy
+  traefik-proxy:
+    name: traefik-proxy
     external: true
