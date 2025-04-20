@@ -30,8 +30,8 @@ services:
     build:
       context: ./docker/node
       args:
-        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
-        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+        DOCKER_USER_UID: ${PUID:?Missing PUID}
+        DOCKER_USER_GID: ${PGID:?Missing PGID}
     depends_on:
       mysql:
         condition: service_healthy
@@ -51,8 +51,8 @@ services:
     build:
       context: ./docker/node
       args:
-        DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
-        DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
+        DOCKER_USER_UID: ${PUID:?Missing PUID}
+        DOCKER_USER_GID: ${PGID:?Missing PGID}
     restart: on-failure
     user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
