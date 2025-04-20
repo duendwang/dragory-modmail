@@ -3,6 +3,12 @@ name: modmail
 services:
   mysql:
     image: mysql:8.0
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD?:Missing MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: modmail
@@ -29,6 +35,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     volumes:
       - ./:/modmail
     networks:
@@ -42,6 +54,12 @@ services:
         DOCKER_USER_UID: ${DOCKER_USER_UID:?Missing DOCKER_USER_UID}
         DOCKER_USER_GID: ${DOCKER_USER_GID:?Missing DOCKER_USER_GID}
     restart: on-failure
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     expose:
       - ${MM_PORT:-8890}
     depends_on:
@@ -68,6 +86,12 @@ services:
     restart: unless-stopped
     expose:
       - "80"
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     environment:
       PMA_HOST: mysql
       PMA_ABSOLUTE_URI: https://${VIRTUAL_HOST:?Missing VIRTUAL_HOST}/phpmyadmin/
