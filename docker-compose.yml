@@ -6,12 +6,8 @@ services:
       args:
         DOCKER_USER_UID: ${PUID:?Missing PUID}
         DOCKER_USER_GID: ${PGID:?Missing PGID}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     volumes:
       - ./:/modmail
     networks:
@@ -25,14 +21,10 @@ services:
         DOCKER_USER_UID: ${PUID:?Missing PUID}
         DOCKER_USER_GID: ${PGID:?Missing PGID}
     restart: on-failure
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     expose:
-      - ${MM_PORT:-8890}:${MM_PORT:-8890}
+      - 8890
     depends_on:
       - build_bot
     volumes:
@@ -40,17 +32,15 @@ services:
     networks:
       - network
       - traefik-proxy
-    environment:
-      VIRTUAL_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
-      VIRTUAL_PATH: /
-      #VIRTUAL_DEST:
-      #VIRTUAL_PORT:
-      LETSENCRYPT_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      DEBUG: ${DEBUG:-false}
+    #environment:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailman.entrypoints=websecure"
+      - "traefik.http.routers.mailman.rule=Host(`$DOMAIN`)"
+      - "traefik.http.routers.mailman.tls.certresolver=http-challenge"
+      - "traefik.http.services.mailman.loadbalancer.server.port=8890"
     command: ["/bin/bash", "/modmail/docker/start-modmail.sh"]
 networks:
   network:
   traefik-proxy:
-    name: traefik-proxy
     external: true
