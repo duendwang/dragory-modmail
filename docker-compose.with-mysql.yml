@@ -1,14 +1,9 @@
-version: '3'
-name: modmail
+#name: modmail
 services:
   mysql:
     image: mysql:8.0
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD?:Missing MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: modmail
@@ -35,12 +30,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     volumes:
       - ./:/modmail
     networks:
@@ -54,14 +45,10 @@ services:
         DOCKER_USER_UID: ${PUID:?Missing PUID}
         DOCKER_USER_GID: ${PGID:?Missing PGID}
     restart: on-failure
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     expose:
-      - ${MM_PORT:-8890}
+      - 8890
     depends_on:
       - build_bot
       - mysql
@@ -71,13 +58,12 @@ services:
       - network
       - nginx-proxy
     environment:
-      VIRTUAL_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
-      VIRTUAL_PATH: /
-      #VIRTUAL_DEST:
-      #VIRTUAL_PORT:
-      LETSENCRYPT_HOST: ${VIRTUAL_HOST:?missing VIRTUAL_HOST}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      DEBUG: ${DEBUG:-false}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`$DOMAIN`)"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=http-challenge"
+      - "traefik.http.services.mailman.loadbalancer.server.port=8890"
     command: ["/bin/bash", "/modmail/docker/start-modmail.sh"]
   phpmyadmin:
     depends_on:
@@ -94,21 +80,19 @@ services:
       - SETGID
     environment:
       PMA_HOST: mysql
-      PMA_ABSOLUTE_URI: https://${VIRTUAL_HOST:?Missing VIRTUAL_HOST}/phpmyadmin/
+      PMA_ABSOLUTE_URI: https://${DOMAIN:?Missing DOMAIN}/phpmyadmin/
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD?:Missing MYSQL_ROOT_PASSWORD}
       MYSQL_USER: modmail
       MYSQL_PASSWORD: ${MYSQL_PASSWORD?:Missing MYSQL_PASSWORD}
-      VIRTUAL_HOST: ${VIRTUAL_HOST:?Missing VIRTUAL_HOST}
-      VIRTUAL_PATH: /phpmyadmin
-      VIRTUAL_DEST: /
-      LETSENCRYPT_HOST: ${VIRTUAL_HOST:?Missing VIRTUAL_HOST}
-      LETSENCRYPT_EMAIL: $LETSENCRYPT_EMAIL
-      DEBUG: ${DEBUG:-false}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
+      - "traefik.http.routers.traefik-rtr.rule=Host(`$DOMAIN`) && PathPrefix(`/phpmyadmin`)"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=http-challenge"
     networks:
       - network
-      - nginx-proxy
+      - traefik-proxy
 networks:
   network:
-  nginx-proxy:
-    name: nginx-proxy
+  traefik-proxy:
     external: true
