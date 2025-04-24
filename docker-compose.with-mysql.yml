@@ -57,7 +57,7 @@ services:
     networks:
       - network
       - nginx-proxy
-    environment:
+    #environment:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
